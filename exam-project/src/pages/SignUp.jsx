@@ -7,8 +7,13 @@ import Sign from '../assets/signup.png'
 import { useState } from 'react';
 import { Link } from 'react-router-dom'
 
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
+
 
 const SignUp = () => {
+
+  const auth = getAuth();
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -31,8 +36,22 @@ const SignUp = () => {
     if (!password) {
       setPasswordError("Enter 8-digit password")
     }
-    if(email && name && password){
-      console.log("Created an Account")
+    if (email && name && password) {
+      
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          console.log("Created an Account")
+
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode)
+          console.log(errorMessage)
+          
+        });
+
+
     }
   }
 
@@ -81,7 +100,7 @@ const SignUp = () => {
 
               <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">SIGN UP</Button>
 
-              <p className='font-inter font-normal text-sm text-body text-center'>Already have an account?<span className='text-light ml-2'><Link to ="/login">Sign in</Link></span></p>
+              <p className='font-inter font-normal text-sm text-body text-center'>Already have an account?<span className='text-light ml-2'><Link to="/login">Sign in</Link></span></p>
 
             </div>
           </div>

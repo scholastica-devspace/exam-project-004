@@ -17,7 +17,7 @@ const LogIn = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleSignUp = () => {
+  const handleLogin = () => {
 
     if (!email) {
       setEmailError("Enter Valid Email")
@@ -68,7 +68,7 @@ const LogIn = () => {
                 passwordError && <p className='font-inter font-normal text-sm text-red-500 mt-1'>{passwordError}</p>
               }
 
-              <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Login To Continue</Button>
+              <Button onClick={handleLogin} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Login To Continue</Button>
 
               <p className='font-inter font-normal text-sm text-body text-center'>Don’t have an account ?<span className='text-light ml-2'><Link to ="/">Sign Up</Link></span></p>
 
