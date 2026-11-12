@@ -1,11 +1,17 @@
 import { Grid } from '@mui/material'
 import { TextField } from '@mui/material'
 import { Button } from '@mui/material'
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+
 import Image from '../components/Image'
 import Sign from '../assets/signup.png'
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom'
+
+import { BiError } from "react-icons/bi";
+import { LuEye, LuEyeClosed } from "react-icons/lu";
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -22,10 +28,18 @@ const SignUp = () => {
   const [emailError, setEmailError] = useState('');
   const [nameError, setNameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(true);
+
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
 
   const handleSignUp = () => {
 
     if (!email) {
+      setEmailError("Enter Your Email")
+
+    } else if (!emailRegex.test(email)) {
       setEmailError("Enter Valid Email")
     }
 
@@ -34,10 +48,14 @@ const SignUp = () => {
     }
 
     if (!password) {
-      setPasswordError("Enter 8-digit password")
+      setPasswordError("Enter A Password")
+
+    } else if (!passwordRegex.test(password)) {
+      setPasswordError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.")
     }
-    if (email && name && password) {
-      
+
+    if (email && emailRegex.test(email) && name && password && passwordRegex.test(password)) {
+
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           console.log("Created an Account")
@@ -48,7 +66,7 @@ const SignUp = () => {
           const errorMessage = error.message;
           console.log(errorCode)
           console.log(errorMessage)
-          
+
         });
 
 
@@ -85,17 +103,30 @@ const SignUp = () => {
 
               <TextField onChange={handleEmail} value={email} id="outlined-basic" label="Email Address" variant="outlined" />
               {
-                emailError && <p className='font-inter font-normal text-sm text-red-500 mt-1'>{emailError}</p>
+                emailError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{emailError}</p>
               }
 
               <TextField onChange={handleName} value={name} className='mt-5!' id="outlined-basic" label="Name" variant="outlined" />
               {
-                nameError && <p className='font-inter font-normal text-sm text-red-500 mt-1'>{nameError}</p>
+                nameError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{nameError}</p>
               }
 
-              <TextField onChange={handlePassword} type="password" value={password} className='mt-5!' id="outlined-basic" label="Password" variant="outlined" />
+              <TextField onChange={handlePassword} value={password} className='mt-5!' id="outlined-basic" label="Password" variant="outlined" type={showPassword ? "password" : "text"}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)}
+                          edge="end" >
+                          {showPassword ? <LuEyeClosed /> : <LuEye />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
               {
-                passwordError && <p className='font-inter font-normal text-sm text-red-500 mt-1'>{passwordError}</p>
+                passwordError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{passwordError}</p>
               }
 
               <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">SIGN UP</Button>
