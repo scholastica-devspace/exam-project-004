@@ -6,16 +6,27 @@ import IconButton from '@mui/material/IconButton';
 
 import Image from '../components/Image'
 import Log from '../assets/login.png'
+import Logo from '../assets/logo.png'
+
 
 import { useState } from 'react';
 import { FcGoogle } from "react-icons/fc";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { BiError } from "react-icons/bi";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { ToastContainer, toast } from 'react-toastify';
+import { ThreeDots } from 'react-loader-spinner'
+
+
+
 
 const LogIn = () => {
+
+  const auth = getAuth();
+  const navigate = useNavigate()
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,6 +34,7 @@ const LogIn = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [loader, setLoader] = useState(false);
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
@@ -44,7 +56,34 @@ const LogIn = () => {
     }
 
     if (email && emailRegex.test(email) && password && passwordRegex.test(password)) {
-      console.log("Logged into Account")
+
+      setLoader(true)
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          toast.success("Welcome back to Aura")
+
+          setTimeout(() => {
+            navigate('/home')
+
+          }, 3000)
+          setLoader(false)
+        })
+
+        .catch((error) => {
+          const errorCode = error.code;
+          setLoader(false)
+
+          if (errorCode.includes("auth/invalid-credential")) {
+            toast.error("Invalid email or password. Please try again.")
+
+          } else if (errorCode.includes("auth/too-many-requests")) {
+            toast.error("Too many attempts. Please try again later.")
+
+          }
+
+        });
+
     }
   }
 
@@ -61,10 +100,26 @@ const LogIn = () => {
 
   return (
     <Grid container>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+
       <Grid size={6}>
 
         <div className='h-full flex items-center justify-center'>
           <div className='w-75'>
+
+            <Image className='mb-3' src={Logo} alt="AppLogo" />
 
             <h1 className='font-poppins font-bold text-5xl text-heading leading-13 capitalize'>You're One Step Away!</h1>
 
@@ -98,9 +153,32 @@ const LogIn = () => {
                 passwordError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{passwordError}</p>
               }
 
-              <Button onClick={handleLogin} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Login To Continue</Button>
+              {
 
-              <p className='font-inter font-normal text-sm text-body text-center'>Don’t have an account ?<span className='text-light ml-2'><Link to="/">Sign Up</Link></span></p>
+                loader ?
+                
+                <div className='flex justify-center py-2'>
+                <ThreeDots
+                  visible={true}
+                  height="60"
+                  width="60"
+                  color="#6D9D2C"
+                  radius="9"
+                  ariaLabel="three-dots-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </div>
+
+              :
+
+              <Button onClick={handleLogin} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Login To Continue</Button>
+              }
+
+
+              
+
+              <p className='font-inter font-normal text-sm text-body text-center'>Don’t have an account ?<span className='font-bold text-light ml-2'><Link to="/">Sign Up</Link></span></p>
 
             </div>
           </div>

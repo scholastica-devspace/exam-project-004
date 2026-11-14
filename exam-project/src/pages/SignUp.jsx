@@ -6,20 +6,27 @@ import IconButton from '@mui/material/IconButton';
 
 import Image from '../components/Image'
 import Sign from '../assets/signup.png'
+import Logo from '../assets/logo.png'
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { BiError } from "react-icons/bi";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { ToastContainer, toast } from 'react-toastify';
+import { ThreeDots } from 'react-loader-spinner'
+
+
 
 
 
 const SignUp = () => {
 
   const auth = getAuth();
+  const navigate = useNavigate()
+
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -29,6 +36,7 @@ const SignUp = () => {
   const [nameError, setNameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [loader, setLoader] = useState(false);
 
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -56,19 +64,35 @@ const SignUp = () => {
 
     if (email && emailRegex.test(email) && name && password && passwordRegex.test(password)) {
 
+      setLoader(true)
+
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          console.log("Created an Account")
+          toast.success("Welcome to Aura!")
+
+          setTimeout(() => {
+            navigate('/login')
+
+          }, 3000)
+          setLoader(false)
+
 
         })
         .catch((error) => {
           const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode)
-          console.log(errorMessage)
+          setLoader(false)
+
+          if (errorCode.includes("auth/email-already-in-use")) {
+            setEmailError("This email is already registered.")
+
+          } else if (errorCode.includes("auth/weak-password")) {
+            setPasswordError("Please choose a stronger password.")
+
+          } else if (errorCode.includes("auth/too-many-requests")) {
+            toast.error("Too many attempts. Please try again later.")
+          }
 
         });
-
 
     }
   }
@@ -90,12 +114,28 @@ const SignUp = () => {
 
   return (
     <Grid container>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+
       <Grid size={6}>
 
         <div className='h-full flex items-center justify-center'>
           <div className='w-75'>
 
-            <h1 className='font-poppins font-bold text-5xl text-heading leading-13 capitalize'>Your journey starts here.</h1>
+            <Image className='mb-3' src={Logo} alt="AppLogo" />
+
+            <h1 className='flexfont-poppins font-bold text-5xl text-heading leading-13 capitalize'>Your journey starts here.</h1>
 
             <p className='font-inter font-normal text-sm text-body/50 mt-3 mb-8'>Create an account and take the first step toward a more connected experience.</p>
 
@@ -129,9 +169,34 @@ const SignUp = () => {
                 passwordError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{passwordError}</p>
               }
 
-              <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">SIGN UP</Button>
 
-              <p className='font-inter font-normal text-sm text-body text-center'>Already have an account?<span className='text-light ml-2'><Link to="/login">Sign in</Link></span></p>
+
+              {
+
+                loader ?
+
+                  <div className='flex justify-center py-2'>
+                    <ThreeDots
+                      visible={true}
+                      height="60"
+                      width="60"
+                      color="#6D9D2C"
+                      radius="9"
+                      ariaLabel="three-dots-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </div>
+
+                  :
+
+                  <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">SIGN UP</Button>
+
+              }
+
+
+
+              <p className='font-inter font-normal text-sm text-body text-center'>Already have an account?<span className='font-bold text-light ml-2'><Link to="/login">Sign in</Link></span></p>
 
             </div>
           </div>
