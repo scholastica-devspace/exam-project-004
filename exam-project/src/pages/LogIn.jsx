@@ -16,7 +16,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { BiError } from "react-icons/bi";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { ToastContainer, toast } from 'react-toastify';
 import { ThreeDots } from 'react-loader-spinner'
 
@@ -61,13 +61,23 @@ const LogIn = () => {
 
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          toast.success("Welcome back to Aura")
 
-          setTimeout(() => {
-            navigate('/home')
+          if (userCredential.user.emailVerified) {
 
-          }, 3000)
-          setLoader(false)
+            toast.success("Welcome back to Aura")
+
+            setTimeout(() => {
+              navigate('/home')
+
+            }, 2000)
+            setLoader(false)
+
+          } else {
+            toast.error("Verify Your Email.")
+            setLoader(false)
+
+          }
+
         })
 
         .catch((error) => {
@@ -97,6 +107,28 @@ const LogIn = () => {
     setPasswordError('')
   }
 
+  const handleGmail = () => {
+
+    const provider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, provider)
+
+      .then((result) => {
+
+        toast.success("Welcome back to Aura")
+
+        setTimeout(() => {
+          navigate('/home')
+
+        }, 2000)
+        setLoader(false)
+
+      }).catch((error) => {
+        const errorCode = error.code;
+
+      });
+  }
+
 
   return (
     <Grid container>
@@ -121,13 +153,13 @@ const LogIn = () => {
 
             <Image className='mb-3' src={Logo} alt="AppLogo" />
 
-            <h1 className='font-poppins font-bold text-5xl text-heading leading-13 capitalize'>You're One Step Away!</h1>
+            <h1 className='font-poppins font-bold text-5xl text-heading leading-13 capitalize'>Welcome to AURA</h1>
 
             <p className='font-inter font-normal text-sm text-body/50 mt-3 mb-8'>Log in to reconnect with everything that matters.</p>
 
             <div className='flex flex-col'>
 
-              <Button className='font-poppins! text-sm! text-heading/70! border-heading/30! capitalize! py-4! rounded-lg!' variant="outlined"><FcGoogle className=' text-2xl! mr-3' />
+              <Button onClick={handleGmail} className='font-poppins! text-sm! text-heading/70! border-heading/30! capitalize! py-4! rounded-lg!' variant="outlined"><FcGoogle className=' text-2xl! mr-3' />
                 Log in with Google</Button>
 
               <TextField onChange={handleEmail} value={email} className='mt-5!' id="outlined-basic" label="Email Address" variant="outlined" />
@@ -156,27 +188,27 @@ const LogIn = () => {
               {
 
                 loader ?
-                
-                <div className='flex justify-center py-2'>
-                <ThreeDots
-                  visible={true}
-                  height="60"
-                  width="60"
-                  color="#6D9D2C"
-                  radius="9"
-                  ariaLabel="three-dots-loading"
-                  wrapperStyle={{}}
-                  wrapperClass=""
-                />
-              </div>
 
-              :
+                  <div className='flex justify-center py-2'>
+                    <ThreeDots
+                      visible={true}
+                      height="60"
+                      width="60"
+                      color="#6D9D2C"
+                      radius="9"
+                      ariaLabel="three-dots-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </div>
 
-              <Button onClick={handleLogin} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Login To Continue</Button>
+                  :
+
+                  <Button onClick={handleLogin} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! mt-7! mb-3!' variant="contained">Login To Continue</Button>
               }
 
+              <Button className=' font-poppins! font-semibold! text-sm! text-olive! bg-transparent! border-none! shadow-none! rounded-full! mb-7!' variant="contained">Forgotten Password?</Button>
 
-              
 
               <p className='font-inter font-normal text-sm text-body text-center'>Don’t have an account ?<span className='font-bold text-light ml-2'><Link to="/">Sign Up</Link></span></p>
 

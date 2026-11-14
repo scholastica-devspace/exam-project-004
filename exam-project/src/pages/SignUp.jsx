@@ -14,7 +14,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { BiError } from "react-icons/bi";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { ToastContainer, toast } from 'react-toastify';
 import { ThreeDots } from 'react-loader-spinner'
 
@@ -67,13 +67,16 @@ const SignUp = () => {
       setLoader(true)
 
       createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          toast.success("Welcome to Aura!")
 
+        .then((userCredential) => {
+
+          sendEmailVerification(auth.currentUser)
+
+          toast.success("Welcome to Aura!")
           setTimeout(() => {
             navigate('/login')
 
-          }, 3000)
+          }, 2000)
           setLoader(false)
 
 
@@ -137,7 +140,7 @@ const SignUp = () => {
 
             <h1 className='flexfont-poppins font-bold text-5xl text-heading leading-13 capitalize'>Your journey starts here.</h1>
 
-            <p className='font-inter font-normal text-sm text-body/50 mt-3 mb-8'>Create an account and take the first step toward a more connected experience.</p>
+            <p className='font-inter font-normal text-sm text-body/50 mt-3 mb-8'>Take the first step toward a more connected experience.</p>
 
             <div className='flex flex-col'>
 
@@ -146,7 +149,7 @@ const SignUp = () => {
                 emailError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{emailError}</p>
               }
 
-              <TextField onChange={handleName} value={name} className='mt-5!' id="outlined-basic" label="Name" variant="outlined" />
+              <TextField onChange={handleName} value={name} className='mt-5! border-red!' id="outlined-basic" label="Name" variant="outlined" />
               {
                 nameError && <p className='flex items-center font-inter font-normal text-sm text-red-500 mt-1 gap-1'><BiError />{nameError}</p>
               }
@@ -190,7 +193,7 @@ const SignUp = () => {
 
                   :
 
-                  <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">SIGN UP</Button>
+                  <Button onClick={handleSignUp} className='font-poppins! text-sm! bg-heading! py-4! rounded-full! my-7!' variant="contained">Create New Account</Button>
 
               }
 
